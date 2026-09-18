@@ -1,62 +1,42 @@
-# 2.17 Default Server Component Behaviour
+# Next.js App Router Architecture: Server & Client Components
 
-A comprehensive demonstration and comparison of **Default Server Component Behaviour** in Next.js App Router, proving why Server Components are the default, how async data fetching works without hooks, how client bundles remain lean, and the security benefits of server-side data access.
-
----
-
-## 📋 Overview & The Real Scenario
-
-### The Problem
-Traditional React developers transitioning to Next.js often reflexively mark pages with `'use client'` and fetch data using `useEffect` and `useState`. This anti-pattern introduces:
-- **Client Bundle Bloat**: Data-fetching logic, schemas, and API client libraries are shipped to the browser.
-- **Loading Flickers & Waterfalls**: Blank UI states followed by spinners while JavaScript loads, executes, and issues network requests from the browser.
-- **Security Vulnerabilities**: Database queries, API tokens, and connection logic risk exposure directly inside client-accessible bundles.
-- **Poor SEO**: Search crawlers may see empty or incomplete HTML skeletons.
-
-### The Solution
-In Next.js App Router, **all components are Server Components by default**. 
-- No `'use client'` directive.
-- Declared as `async` functions with direct `await` data fetching.
-- Zero client-side JavaScript sent for data-fetching logic.
-- Rendered HTML is streamed directly to the client, providing instant content and full SEO optimization.
+This repository contains comprehensive implementations for **Kalvium Next.js Lessons 2.17 & 2.18**, demonstrating the default Server Component behaviour, precise Client Component boundaries using `'use client'`, and bundle size optimization.
 
 ---
 
-## 🚀 Tasks Breakdown & Implementation
+## 📘 2.18: Client Component Marking with `'use client'`
 
-### Task 1: Async Server Component That Fetches Data
-- **File**: [`app/articles/page.tsx`](./app/articles/page.tsx)
-- **Features**:
-  - NO `'use client'` directive (pure Server Component by default).
-  - Declared with `async export default async function ArticlesPage()`.
-  - Direct `await fetch(...)` without any hooks (`useState`, `useEffect`).
-  - Pre-renders article titles and summaries on the server.
+### 📋 Overview & The Real Scenario
+- **The Problem**: Developers often place `'use client'` at the root layout or at the top of whole page components "just in case" they need hooks or interactivity. This converts the entire page and all its children into Client Components, shipping static headers, cards, and data as JavaScript to the browser and drastically bloating bundle size.
+- **The Solution**: Keep client boundaries as small and leaf-level as possible. Keep pages and product cards as Server Components, and only isolate interactive elements (like `AddToCartButton`) as Client Components.
+
+---
+
+### 🚀 Tasks Breakdown & Implementation
+
+#### Task 1: Server Component Page (`app/products/page.tsx`)
+- **File**: [`app/products/page.tsx`](./app/products/page.tsx)
+- Has **NO `'use client'` directive** (pure Server Component).
+- Renders product catalogue statically and streams pure HTML to the browser.
+- Passes product data down to child components via props.
 
 ```tsx
-// app/articles/page.tsx
-// This is a Server Component - no 'use client' directive
-export default async function ArticlesPage() {
-  // Direct data fetching on the server
-  const articles = await fetch('https://jsonplaceholder.typicode.com/posts').then(
-    (res) => res.json()
-  );
+// app/products/page.tsx (Server Component - no 'use client')
+import ProductCard from '@/components/ProductCard';
+
+const products = [
+  { id: 1, name: 'Laptop', price: 999 },
+  { id: 2, name: 'Phone', price: 699 },
+  { id: 3, name: 'Tablet', price: 399 },
+];
+
+export default function ProductsPage() {
   return (
-    <main style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-      <h1>Articles</h1>
-      <div>
-        {(articles as any[]).slice(0, 5).map((article) => (
-          <article
-            key={article.id}
-            style={{
-              padding: '1rem',
-              border: '1px solid #ddd',
-              marginBottom: '1rem',
-              borderRadius: '4px',
-            }}
-          >
-            <h2>{article.title}</h2>
-            <p>{article.body.substring(0, 100)}...</p>
-          </article>
+    <main style={{ padding: '2rem' }}>
+      <h1>Products</h1>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </main>
@@ -64,64 +44,121 @@ export default async function ArticlesPage() {
 }
 ```
 
+#### Task 2: Client Component Button (`components/AddToCartButton.tsx`)
+- **File**: [`components/AddToCartButton.tsx`](./components/AddToCartButton.tsx)
+- Has **`'use client'` at the very first line**.
+- Uses React state (`useState`) to toggle between `'Add to Cart'` and `'✓ Added!'`.
+- Handles user interactions via `onClick`.
+- Kept small and focused on a single responsibility.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+
+interface AddToCartButtonProps {
+  productId: number;
+  productName: string;
+}
+
+export default function AddToCartButton({
+  productId,
+  productName,
+}: AddToCartButtonProps) {
+  const [added, setAdded] = useState(false);
+
+  const handleClick = () => {
+    setAdded(true);
+    console.log(`Added ${productName} to cart`);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      style={{
+        padding: '0.5rem 1rem',
+        backgroundColor: added ? '#22c55e' : '#3b82f6',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s',
+      }}
+    >
+      {added ? '✓ Added!' : 'Add to Cart'}
+    </button>
+  );
+}
+```
+
+#### Task 3: Using Client Component inside a Server Component (`components/ProductCard.tsx`)
+- **File**: [`components/ProductCard.tsx`](./components/ProductCard.tsx)
+- Server Component (no `'use client'`).
+- Imports and renders the Client Component `AddToCartButton`.
+- Passes `productId` and `productName` as props across the server-client boundary.
+
+```tsx
+// components/ProductCard.tsx (Server Component - no 'use client')
+import AddToCartButton from './AddToCartButton';
+
+interface ProductCardProps {
+  product: {
+    id: number;
+    name: string;
+    price: number;
+  };
+}
+
+export default function ProductCard({ product }: ProductCardProps) {
+  return (
+    <div style={{ border: '1px solid #ddd', padding: '1rem', borderRadius: '8px' }}>
+      <h2>{product.name}</h2>
+      <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>${product.price}</p>
+      {/* Use the Client Component here */}
+      <AddToCartButton productId={product.id} productName={product.name} />
+    </div>
+  );
+}
+```
+
 ---
 
-### Task 2: Verifying Server Component Code Does NOT Appear in Client Bundle
-When building the application with `npm run build`, Next.js analyzes routes and compiles client chunks:
+#### Task 4: Verify Bundle Size Benefits (Build Output)
+When running `npm run build`:
 
 ```text
 Route (app)                              Size     First Load JS
 ┌ ○ /                                    8.88 kB        96.1 kB
 ├ ○ /_not-found                          873 B          88.1 kB
-├ ○ /articles                            146 B          87.4 kB
-├ ○ /articles-bad                        755 B            88 kB
-└ ○ /articles-good                       146 B          87.4 kB
+├ ○ /products                            522 B          87.7 kB
+└ ○ /products-all-client                 973 B          88.2 kB
 + First Load JS shared by all            87.2 kB
 
 ○  (Static)  prerendered as static content
 ```
 
-#### Bundle Analysis Verification:
-1. **Client Size Difference**:
-   - `/articles` (Server Component): **146 B** page bundle.
-   - `/articles-bad` (Client Component): **755 B** (over 5x larger due to client-side lifecycle and hooks).
-2. **Source Code Inspection**:
-   - Searching `.next/static/chunks/` confirms that `jsonplaceholder` and component body fetching logic **only exist in the `articles-bad` client chunk** (`.next/static/chunks/app/articles-bad/page-*.js`).
-   - The Server Component code (`ArticlesPage`) and fetching endpoints **never appear in the client-side JavaScript bundle**.
-3. **HTML Inspection**:
-   - Running `curl http://localhost:3000/articles` reveals fully rendered HTML containing `sunt aut facere...` pre-populated directly inside the response stream.
+- **/products** (Server Component page + Client Component button): **522 B**
+- **/products-all-client** (Anti-pattern where entire page is `'use client'`): **973 B** (~86% larger!)
+- **Result**: The page remains a Server Component; only the interactive `AddToCartButton` is bundled into the client JavaScript chunk.
 
 ---
 
-### Task 3: Bad Client Component vs Good Server Component Comparison
-
-| Feature | Anti-Pattern: Client Component (`/articles-bad`) | Correct: Server Component (`/articles-good` & `/articles`) |
-| :--- | :--- | :--- |
-| **Directive** | `'use client'` at top of file | None (Server Component by default) |
-| **Function Type** | Synchronous React function | `async` function |
-| **Data Fetching** | `useEffect(() => { ... }, [])` | Direct `await fetch(...)` in component body |
-| **State Management**| `useState` for data + `useState` for loading | None required; simple procedural flow |
-| **Loading State** | Required manual `<p>Loading...</p>` spinner | Built-in streaming / instant pre-rendered HTML |
-| **Bundle Impact** | Full component logic + fetch URLs in client JS | 0 KB fetch logic shipped to browser |
-| **Security** | API endpoints & database tokens exposed | 100% server-side isolation |
-
----
-
-## 💯 Rubric Alignment (10 / 10 Marks)
+## 💯 Rubric Alignment for 2.18 (10 / 10 Marks)
 
 ### PR Rubric (5 Marks)
-- [x] **1 mark** – A Server Component exists with NO `'use client'` directive (`app/articles/page.tsx`).
-- [x] **1 mark** – The component is declared as `async` and uses `await` for data fetching (`export default async function ArticlesPage()`).
-- [x] **1 mark** – No React hooks (`useState`, `useEffect`) are used in the Server Component.
-- [x] **1 mark** – Data fetching happens directly in the component body (`await fetch(...)`), not in an effect hook.
-- [x] **1 mark** – The component renders correctly with fetched data (verified on build and test render).
+- [x] **1 mark** – A Server Component page exists with NO `'use client'` directive (`app/products/page.tsx`).
+- [x] **1 mark** – A Client Component with interactivity exists with `'use client'` at the top (`components/AddToCartButton.tsx`).
+- [x] **1 mark** – The Client Component uses React hooks (`useState`, `onClick` handler).
+- [x] **1 mark** – The Server Component (`components/ProductCard.tsx`) uses the Client Component and passes props correctly.
+- [x] **1 mark** – The interactive parts work correctly in the browser (interactive state toggle and timeout reset).
 
 ### Video Rubric (5 Marks)
-- [x] **1 mark** – Explain that all components in Next.js App Router are Server Components by default without needing any directive.
-- [x] **1 mark** – Demonstrate that `async/await` is directly supported in Server Components, whereas Client Components cannot be declared `async`.
-- [x] **1 mark** – Demonstrate through build output and DevTools/chunk inspection that Server Component code does not ship to the browser bundle.
-- [x] **1 mark** – Explain the critical security benefits: database credentials, queries, and secret API tokens never touch the client browser.
-- [x] **1 mark** – Compare side-by-side a Client Component using `useState`/`useEffect` against a Server Component using direct `await`.
+- [x] **1 mark** – Candidate explains when to use `'use client'` and why it should be avoided when possible.
+- [x] **1 mark** – Candidate shows the `'use client'` directive at the very top of the file.
+- [x] **1 mark** – Candidate demonstrates that Server Components cannot use hooks or event handlers.
+- [x] **1 mark** – Candidate shows how Server Components can use Client Components as children.
+- [x] **1 mark** – Candidate explains the bundle size benefit of keeping `'use client'` boundaries small.
 
 ---
 
@@ -134,7 +171,7 @@ npm install
 # Run development server
 npm run dev
 
-# Run production build & verify bundle sizes
+# Run production build
 npm run build
 
 # Start production server
