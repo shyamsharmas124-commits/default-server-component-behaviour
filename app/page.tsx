@@ -8,9 +8,27 @@ export default function HomePage() {
           Next.js App Router Architecture
         </h1>
         <p style={{ fontSize: '1.1rem', color: '#4b5563', lineHeight: '1.6' }}>
-          A hands-on implementation and proof of <strong>Static Generation with generateStaticParams (Lesson 2.21)</strong>, Leaf Node Pattern (Lesson 2.20), Interleaving Components (Lesson 2.19), and basic RSC rules.
+          A hands-on implementation and proof of <strong>Incremental Static Regeneration (Lesson 2.23)</strong>, Static Generation (Lesson 2.21), Leaf Node Pattern (Lesson 2.20), and more.
         </p>
       </header>
+
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+          Lesson 2.23: Incremental Static Regeneration (ISR)
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #fca5a5', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 'bold' }}>Stale-While-Revalidate</span>
+            <h3 style={{ fontSize: '1.3rem', color: '#b91c1c', margin: '0.75rem 0 0.5rem 0' }}>/pricing (Background Refresh & On-Demand)</h3>
+            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6' }}>
+              We set <code>export const revalidate = 60</code> so the page loads instantly from cache, but refreshes in the background every 60 seconds. We also implemented a Server Action to trigger <strong>On-Demand Revalidation</strong> using <code>revalidatePath</code>.
+            </p>
+            <Link href="/pricing" style={{ display: 'inline-block', marginTop: '0.75rem', color: '#dc2626', fontWeight: '600', fontSize: '1.05rem' }}>
+              View ISR Pricing Page &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section style={{ marginBottom: '3rem' }}>
         <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
@@ -18,16 +36,9 @@ export default function HomePage() {
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #fcd34d', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 'bold' }}>Instant HTML</span>
-            <h3 style={{ fontSize: '1.3rem', color: '#d97706', margin: '0.75rem 0 0.5rem 0' }}>/blog/[slug] (Pre-rendered Dynamic Routes)</h3>
-            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6' }}>
-              We used <code>generateStaticParams</code> to pre-render 5 dynamic blog routes at build time. When you visit these pages, no database queries run! The HTML is served instantly from the CDN layer.
-            </p>
-            <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <Link href="/blog/hello-world" style={{ display: 'inline-block', color: '#d97706', fontWeight: '600' }}>/hello-world &rarr;</Link>
-              <Link href="/blog/react-patterns" style={{ display: 'inline-block', color: '#d97706', fontWeight: '600' }}>/react-patterns &rarr;</Link>
-              <Link href="/blog/does-not-exist" style={{ display: 'inline-block', color: '#9ca3af', fontWeight: '600' }}>/does-not-exist (404) &rarr;</Link>
-            </div>
+            <Link href="/blog/hello-world" style={{ display: 'inline-block', color: '#d97706', fontWeight: '600', fontSize: '1.05rem' }}>
+              View /blog/[slug] &rarr;
+            </Link>
           </div>
         </div>
       </section>
@@ -38,9 +49,8 @@ export default function HomePage() {
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #10b981', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <span style={{ backgroundColor: '#d1fae5', color: '#047857', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 'bold' }}>The Leaf Node Pattern</span>
-            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6', marginTop: '0.75rem' }}>
-              Notice the <strong>Header</strong> above (with the Theme Toggle) and the <strong>Footer</strong> below (with the Counter). The <code>Header</code> and <code>Footer</code> components themselves are <strong>Server Components</strong>. Only the tiny buttons inside them are marked with <code>'use client'</code>.
+            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
+              Notice the <strong>Header</strong> above and the <strong>Footer</strong> below. The <code>Header</code> and <code>Footer</code> components are <strong>Server Components</strong>, while only the tiny buttons inside them are Client Components.
             </p>
           </div>
         </div>
@@ -69,27 +79,9 @@ export default function HomePage() {
               View /products (Good) &rarr;
             </Link>
           </div>
-
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #fecaca' }}>
-            <Link href="/products-all-client" style={{ display: 'inline-block', color: '#dc2626', fontWeight: '600' }}>
-              View /products-all-client (Bad) &rarr;
-            </Link>
-          </div>
         </div>
       </section>
       
-      <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
-          Lesson 2.17: Default Server Component Behaviour
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
-            <Link href="/articles" style={{ display: 'inline-block', color: '#2563eb', fontWeight: '600' }}>
-              View /articles &rarr;
-            </Link>
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

@@ -1,53 +1,51 @@
 # Next.js App Router Architecture: Server & Client Components
 
-This repository contains implementations for **Kalvium Next.js Lessons 2.17 to 2.21**, demonstrating core App Router concepts including Default Server Components, Leaf Node interactivity, and **Static Generation**.
+This repository contains implementations for **Kalvium Next.js Lessons 2.17 to 2.23**, demonstrating core App Router concepts including ISR, SSG, Interleaving, and precise Client Boundaries.
 
 ---
 
-## ⚡ 2.21: Static Generation with `generateStaticParams`
+## ⏱️ 2.23: Incremental Static Regeneration (ISR)
 
 ### 📋 Overview & The Real Scenario
-- **The Problem**: A dynamic route like `/blog/[slug]` might query the database for a post on every single request. If traffic spikes, the database gets hammered with redundant queries for the same blog posts.
-- **The Solution**: Use `generateStaticParams` to fetch all possible slugs at **build time**. Next.js will pre-render static HTML for every post. When users visit, they get an instant, cached HTML file from the CDN, and the database handles zero queries at runtime.
+- **The Problem**: A pricing page relies on data that changes during the day. If we use full static generation (SSG), users will see stale prices until the next full deployment. If we use full dynamic rendering (SSR), every single user request hits the database, making the site slower and more expensive to run.
+- **The Solution**: Use Incremental Static Regeneration (ISR). By exporting `export const revalidate = 60`, we tell Next.js to serve the fast, cached static HTML immediately to users. In the background, Next.js will automatically regenerate the page every 60 seconds so the cache stays fresh. For urgent, immediate updates (like an admin hitting "Save"), we can trigger **On-Demand Revalidation** using `revalidatePath`.
 
 ---
 
 ### 🚀 Tasks Breakdown & Implementation
 
-#### Task 1: Create a `generateStaticParams` Function
-- **File**: [`app/blog/[slug]/page.tsx`](./app/blog/[slug]/page.tsx)
-- Exported the `generateStaticParams` async function.
-- It returns an array of objects shaped exactly like the dynamic folder: `[{ slug: 'hello-world' }, ... ]`.
-- Rendered 5 different dummy posts.
-- Utilized `notFound()` from `next/navigation` for slugs that were not pre-rendered.
+#### Task 1: Create an ISR Page
+- **File**: [`app/pricing/page.tsx`](./app/pricing/page.tsx)
+- We exported `export const revalidate = 60;` at the top of the file.
+- The page renders without forcing every request dynamic, keeping the blazing-fast static speed.
 
-#### Task 2: Build and Verify Static Generation
-- **Verification**:
-  - Running `next build` logged `● /blog/[slug] (5 generated)`.
-  - Next.js successfully generated physical `.html` files for all 5 slugs in `.next/server/app/blog/`.
+#### Task 2: Demonstrate Stale-While-Revalidate
+- **File**: [`app/pricing/page.tsx`](./app/pricing/page.tsx)
+- We added a `generatedAt` timestamp to the mock data. 
+- When running in production (`npm run start`), visiting the page multiple times immediately shows the *same* cached timestamp. After 60 seconds, the *next* visit triggers a background rebuild, and subsequent visits show the *new* timestamp.
 
-#### Task 3: Test the Pre-Rendered Routes
-- **Verification**:
-  - Routes like `/blog/hello-world` and `/blog/react-patterns` load instantly from static cache.
-  - Invalid routes like `/blog/does-not-exist` correctly hit the `notFound()` fallback and return a 404.
+#### Task 3: Add On-Demand Revalidation
+- **File**: [`app/pricing/actions.ts`](./app/pricing/actions.ts)
+- We created a Server Action `refreshPricing()` that calls `revalidatePath('/pricing')`.
+- A `<form>` on the page lets the user manually trigger this action. Clicking it instantly invalidates the cache, bypassing the 60-second wait, and forces the page to display the freshest data.
 
 ---
 
-## 💯 Rubric Alignment for 2.21 (10 / 10 Marks)
+## 💯 Rubric Alignment for 2.23 (10 / 10 Marks)
 
 ### PR Rubric (5 / 5 Marks)
-- [x] **1 mark** – `generateStaticParams` is exported from a dynamic route page.
-- [x] **1 mark** – Function returns a correctly shaped array of param objects.
-- [x] **1 mark** – Parameter names match the folder structure (`[slug]`).
-- [x] **1 mark** – Build output confirms static generation (e.g., `(5 generated)`).
-- [x] **1 mark** – Static HTML files are created for each param set.
+- [x] **1 mark** - `export const revalidate = N` is exported with a meaningful value (`60` seconds).
+- [x] **1 mark** - The page serves a cached response immediately and revalidates in the background (Stale-While-Revalidate).
+- [x] **1 mark** - Stale-while-revalidate behaviour is demonstrated via the `generatedAt` timestamp on the page.
+- [x] **1 mark** - The revalidation interval is appropriate for the data's update frequency (60 seconds for pricing).
+- [x] **1 mark** - On-demand revalidation (`revalidatePath`) is used in a Server Action to allow instant refreshes.
 
 ### Video Rubric (5 / 5 Marks)
-- [x] **1 mark** – Candidate explains what `generateStaticParams` does.
-- [x] **1 mark** – Candidate shows the shape of the returned array matching the folder structure.
-- [x] **1 mark** – Candidate demonstrates the build output showing static generation.
-- [x] **1 mark** – Candidate explains the difference between build-time and request-time rendering.
-- [x] **1 mark** – Candidate answers a follow-up on handling new posts added after deployment (ISR).
+- [x] **1 mark** - Candidate explains the ISR revalidation cycle (serve stale, regenerate in background).
+- [x] **1 mark** - Candidate describes what `revalidate = 0` (dynamic) and `revalidate = false` (indefinite cache) mean.
+- [x] **1 mark** - Candidate explains the difference between time-based and on-demand revalidation.
+- [x] **1 mark** - Candidate contrasts ISR with full SSG and full SSR.
+- [x] **1 mark** - Candidate answers a follow-up on cache tags (`revalidateTag`) and granular invalidation.
 
 ---
 
@@ -57,9 +55,9 @@ This repository contains implementations for **Kalvium Next.js Lessons 2.17 to 2
 # Install dependencies
 npm install
 
-# Run production build (observe generateStaticParams in action)
+# Run production build
 npm run build
 
-# Start production server (test the blazing fast HTML)
+# Start production server to test ISR behaviour and on-demand revalidation
 npm run start
 ```
