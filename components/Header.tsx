@@ -17,11 +17,10 @@ export default function Header() {
     }}>
       <nav style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', alignItems: 'center' }}>
         <Link href="/" style={{ color: '#ffffff', textDecoration: 'none', fontWeight: 'bold', fontSize: '1.1rem' }}>Next.js Masterclass</Link>
-        <Link href="/blog/hello-world" style={{ color: '#f59e0b', textDecoration: 'none', fontWeight: 'bold' }}>2.21: SSG</Link>
+        <Link href="/pricing" style={{ color: '#ef4444', textDecoration: 'none', fontWeight: 'bold' }}>2.23: ISR</Link>
+        <Link href="/blog/hello-world" style={{ color: '#f59e0b', textDecoration: 'none' }}>2.21: SSG</Link>
         <Link href="/todos" style={{ color: '#a78bfa', textDecoration: 'none' }}>2.19: Interleaving</Link>
         <Link href="/products" style={{ color: '#38bdf8', textDecoration: 'none' }}>2.18: Selective</Link>
-        <Link href="/products-all-client" style={{ color: '#f87171', textDecoration: 'none' }}>2.18: Bloat</Link>
-        <Link href="/articles" style={{ color: '#cbd5e1', textDecoration: 'none' }}>2.17: RSC</Link>
       </nav>
       {/* Only the toggle is interactive. The rest of the Header stays on the Server. */}
       <ThemeToggle />
