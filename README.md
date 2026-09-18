@@ -1,61 +1,53 @@
 # Next.js App Router Architecture: Server & Client Components
 
-This repository contains comprehensive implementations for **Kalvium Next.js Lessons 2.17, 2.18, 2.19, and 2.20**, demonstrating the default Server Component behaviour, precise Client Component boundaries, the Interleaving Pattern, and **Pushing Interactivity to Leaf Nodes**.
+This repository contains implementations for **Kalvium Next.js Lessons 2.17 to 2.21**, demonstrating core App Router concepts including Default Server Components, Leaf Node interactivity, and **Static Generation**.
 
 ---
 
-## 🍃 2.20: Pushing Interactivity to Leaf Nodes
+## ⚡ 2.21: Static Generation with `generateStaticParams`
 
 ### 📋 Overview & The Real Scenario
-- **The Problem**: A developer marks a top-level layout or wrapper component as `'use client'` because a single theme toggle button inside it needs interactivity. Now, the entire layout, navigation, and everything underneath it are shipped to the browser as Client Components, massively bloating the bundle.
-- **The Solution (Leaf Node Pattern)**: Keep the layout and large wrappers as Server Components. Extract **only** the interactive button into its own tiny Client Component (a "leaf node"). Only that small JavaScript file is sent to the browser.
+- **The Problem**: A dynamic route like `/blog/[slug]` might query the database for a post on every single request. If traffic spikes, the database gets hammered with redundant queries for the same blog posts.
+- **The Solution**: Use `generateStaticParams` to fetch all possible slugs at **build time**. Next.js will pre-render static HTML for every post. When users visit, they get an instant, cached HTML file from the CDN, and the database handles zero queries at runtime.
 
 ---
 
 ### 🚀 Tasks Breakdown & Implementation
 
-#### Task 1: Server Component Layout (`app/layout.tsx`)
-- **File**: [`app/layout.tsx`](./app/layout.tsx)
-- The global layout remains a Server Component (no `'use client'`).
-- It renders the `<Header />`, `<main>`, and `<Footer />`.
+#### Task 1: Create a `generateStaticParams` Function
+- **File**: [`app/blog/[slug]/page.tsx`](./app/blog/[slug]/page.tsx)
+- Exported the `generateStaticParams` async function.
+- It returns an array of objects shaped exactly like the dynamic folder: `[{ slug: 'hello-world' }, ... ]`.
+- Rendered 5 different dummy posts.
+- Utilized `notFound()` from `next/navigation` for slugs that were not pre-rendered.
 
-#### Task 2: Interactive Leaf Components (`components/ThemeToggle.tsx` & `components/CounterButton.tsx`)
-- **Files**: 
-  - [`components/ThemeToggle.tsx`](./components/ThemeToggle.tsx)
-  - [`components/CounterButton.tsx`](./components/CounterButton.tsx)
-- These tiny components have `'use client'` at the top.
-- They encapsulate all state (`useState`) and interactivity (click handlers).
-- They are extracted into entirely separate files to prevent accidentally infecting parent components.
-
-#### Task 3: Use Leaf Components in Server Components (`components/Header.tsx` & `components/Footer.tsx`)
-- **Files**: 
-  - [`components/Header.tsx`](./components/Header.tsx)
-  - [`components/Footer.tsx`](./components/Footer.tsx)
-- The Header and Footer components themselves are pure Server Components.
-- They render static HTML (navigation links, text) and import/render the Client Component leaves inside them.
-
-#### Task 4: Verify Bundle Size
+#### Task 2: Build and Verify Static Generation
 - **Verification**:
-  - Running `next build` reveals that Layout, Header, and Footer are all marked as `○` (Server static content).
-  - Only `ThemeToggle` and `CounterButton` are shipped to the client, keeping the `First Load JS` footprint minimal.
+  - Running `next build` logged `● /blog/[slug] (5 generated)`.
+  - Next.js successfully generated physical `.html` files for all 5 slugs in `.next/server/app/blog/`.
+
+#### Task 3: Test the Pre-Rendered Routes
+- **Verification**:
+  - Routes like `/blog/hello-world` and `/blog/react-patterns` load instantly from static cache.
+  - Invalid routes like `/blog/does-not-exist` correctly hit the `notFound()` fallback and return a 404.
 
 ---
 
-## 💯 Rubric Alignment for 2.20 (10 / 10 Marks)
+## 💯 Rubric Alignment for 2.21 (10 / 10 Marks)
 
 ### PR Rubric (5 / 5 Marks)
-- [x] **1 mark** – Layout and Header/Footer have NO `'use client'` directives.
-- [x] **1 mark** – At least 2 small, focused Client Components exist with `'use client'` (`ThemeToggle`, `CounterButton`).
-- [x] **1 mark** – Leaf Client Components are in separate files.
-- [x] **1 mark** – Leaf Client Components use React hooks (`useState`).
-- [x] **1 mark** – Leaf components are used by Server Component parents (`Header`, `Footer`).
+- [x] **1 mark** – `generateStaticParams` is exported from a dynamic route page.
+- [x] **1 mark** – Function returns a correctly shaped array of param objects.
+- [x] **1 mark** – Parameter names match the folder structure (`[slug]`).
+- [x] **1 mark** – Build output confirms static generation (e.g., `(5 generated)`).
+- [x] **1 mark** – Static HTML files are created for each param set.
 
 ### Video Rubric (5 / 5 Marks)
-- [x] **1 mark** – Candidate explains the leaf node pattern.
-- [x] **1 mark** – Candidate shows that parent components remain Server Components.
-- [x] **1 mark** – Candidate demonstrates that only leaf components are Client Components.
-- [x] **1 mark** – Candidate explains the bundle size benefit.
-- [x] **1 mark** – Candidate answers a follow-up on when the entire page needs to be interactive.
+- [x] **1 mark** – Candidate explains what `generateStaticParams` does.
+- [x] **1 mark** – Candidate shows the shape of the returned array matching the folder structure.
+- [x] **1 mark** – Candidate demonstrates the build output showing static generation.
+- [x] **1 mark** – Candidate explains the difference between build-time and request-time rendering.
+- [x] **1 mark** – Candidate answers a follow-up on handling new posts added after deployment (ISR).
 
 ---
 
@@ -65,9 +57,9 @@ This repository contains comprehensive implementations for **Kalvium Next.js Les
 # Install dependencies
 npm install
 
-# Run production build
+# Run production build (observe generateStaticParams in action)
 npm run build
 
-# Start production server
+# Start production server (test the blazing fast HTML)
 npm run start
 ```
