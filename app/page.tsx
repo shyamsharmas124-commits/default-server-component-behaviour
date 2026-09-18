@@ -8,9 +8,27 @@ export default function HomePage() {
           Next.js App Router Architecture
         </h1>
         <p style={{ fontSize: '1.1rem', color: '#4b5563', lineHeight: '1.6' }}>
-          A hands-on implementation and proof of <strong>Parallel Data Fetching (Lesson 2.24)</strong>, Incremental Static Regeneration (Lesson 2.23), Static Generation (Lesson 2.21), and more.
+          A hands-on implementation and proof of <strong>Sequential Data Fetching (Lesson 2.25)</strong>, Parallel Data Fetching (Lesson 2.24), ISR, and more.
         </p>
       </header>
+
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+          Lesson 2.25: Sequential Data Fetching
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #f9a8d4', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <span style={{ backgroundColor: '#fdf2f8', color: '#be185d', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 'bold' }}>Dependent Chains</span>
+            <h3 style={{ fontSize: '1.3rem', color: '#be185d', margin: '0.75rem 0 0.5rem 0' }}>/account (User &rarr; Orders)</h3>
+            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6' }}>
+              We fetch the user profile first, and only await the orders fetch <em>after</em> we get the user's ID. Meanwhile, independent requests (like site preferences) run concurrently to minimize the waterfall. Error boundaries handle missing users vs missing orders gracefully.
+            </p>
+            <Link href="/account" style={{ display: 'inline-block', marginTop: '0.75rem', color: '#db2777', fontWeight: '600', fontSize: '1.05rem' }}>
+              View Account Page &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section style={{ marginBottom: '3rem' }}>
         <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
@@ -18,12 +36,7 @@ export default function HomePage() {
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #86efac', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 'bold' }}>Promise.all</span>
-            <h3 style={{ fontSize: '1.3rem', color: '#166534', margin: '0.75rem 0 0.5rem 0' }}>/dashboard (Concurrent Requests)</h3>
-            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6' }}>
-              Instead of awaiting profile, notifications, and analytics sequentially (creating a slow waterfall), we fire all three independent requests concurrently using <code>Promise.all</code>. This reduces the total wait time to only the slowest request.
-            </p>
-            <Link href="/dashboard" style={{ display: 'inline-block', marginTop: '0.75rem', color: '#16a34a', fontWeight: '600', fontSize: '1.05rem' }}>
+            <Link href="/dashboard" style={{ display: 'inline-block', color: '#16a34a', fontWeight: '600', fontSize: '1.05rem' }}>
               View Dashboard &rarr;
             </Link>
           </div>
@@ -77,6 +90,19 @@ export default function HomePage() {
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #c4b5fd', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
             <Link href="/todos" style={{ display: 'inline-block', color: '#7c3aed', fontWeight: '600', fontSize: '1.05rem' }}>
               Explore the Interleaving Pattern &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+          Lesson 2.18: Client Component Marking
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #bfdbfe' }}>
+            <Link href="/products" style={{ display: 'inline-block', color: '#2563eb', fontWeight: '600' }}>
+              View /products (Good) &rarr;
             </Link>
           </div>
         </div>
