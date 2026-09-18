@@ -8,9 +8,24 @@ export default function HomePage() {
           Next.js App Router Architecture
         </h1>
         <p style={{ fontSize: '1.1rem', color: '#4b5563', lineHeight: '1.6' }}>
-          A hands-on implementation and proof of <strong>Interleaving Server and Client Components (Lesson 2.19)</strong>, Default Server Component Behaviour (Lesson 2.17), and Client Component Marking (Lesson 2.18).
+          A hands-on implementation and proof of <strong>Pushing Interactivity to Leaf Nodes (Lesson 2.20)</strong>, Interleaving Components (Lesson 2.19), and basic Server/Client Component rules.
         </p>
       </header>
+      
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+          Lesson 2.20: Pushing Interactivity to Leaf Nodes
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #10b981', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <span style={{ backgroundColor: '#d1fae5', color: '#047857', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 'bold' }}>The Leaf Node Pattern</span>
+            <h3 style={{ fontSize: '1.3rem', color: '#047857', margin: '0.75rem 0 0.5rem 0' }}>Global Layout, Header, & Footer</h3>
+            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6' }}>
+              Notice the <strong>Header</strong> above (with the Theme Toggle) and the <strong>Footer</strong> below (with the Counter). The <code>Header</code> and <code>Footer</code> components themselves are <strong>Server Components</strong>. Only the tiny buttons inside them are marked with <code>'use client'</code>. This keeps the layout bundle microscopic!
+            </p>
+          </div>
+        </div>
+      </section>
 
       <section style={{ marginBottom: '3rem' }}>
         <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
@@ -37,9 +52,6 @@ export default function HomePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #bfdbfe' }}>
             <h3 style={{ fontSize: '1.25rem', color: '#1e40af', margin: '0 0 0.5rem 0' }}>/products (Good)</h3>
-            <p style={{ color: '#4b5563', fontSize: '0.95rem' }}>
-              Server Component page with small isolated Client Component leaf nodes.
-            </p>
             <Link href="/products" style={{ display: 'inline-block', marginTop: '0.5rem', color: '#2563eb', fontWeight: '600' }}>
               View /products &rarr;
             </Link>
@@ -47,9 +59,6 @@ export default function HomePage() {
 
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #fecaca' }}>
             <h3 style={{ fontSize: '1.25rem', color: '#991b1b', margin: '0 0 0.5rem 0' }}>/products-all-client (Bad)</h3>
-            <p style={{ color: '#4b5563', fontSize: '0.95rem' }}>
-              Entire page marked with <code>&apos;use client&apos;</code> causing client bundle bloat.
-            </p>
             <Link href="/products-all-client" style={{ display: 'inline-block', marginTop: '0.5rem', color: '#dc2626', fontWeight: '600' }}>
               View /products-all-client &rarr;
             </Link>

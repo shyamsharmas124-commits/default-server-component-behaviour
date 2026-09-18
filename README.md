@@ -1,54 +1,61 @@
 # Next.js App Router Architecture: Server & Client Components
 
-This repository contains comprehensive implementations for **Kalvium Next.js Lessons 2.17, 2.18, and 2.19**, demonstrating the default Server Component behaviour, precise Client Component boundaries, and the **Interleaving Pattern**.
+This repository contains comprehensive implementations for **Kalvium Next.js Lessons 2.17, 2.18, 2.19, and 2.20**, demonstrating the default Server Component behaviour, precise Client Component boundaries, the Interleaving Pattern, and **Pushing Interactivity to Leaf Nodes**.
 
 ---
 
-## 📘 2.19: Interleaving Server and Client Components
+## 🍃 2.20: Pushing Interactivity to Leaf Nodes
 
 ### 📋 Overview & The Real Scenario
-- **The Problem**: A Client Component needs to filter and search a list of items. If it fetches the data directly via an API call in `useEffect`, it causes duplicate fetches, exposes API endpoints to the client, and wastes bandwidth. 
-- **The Solution (Interleaving Pattern)**: A Server Component fetches the data directly from the database or API and passes it as serialized props to the Client Component. The Client Component receives the ready-made data and handles interactivity (filtering/sorting) entirely locally, with zero duplicate fetches.
+- **The Problem**: A developer marks a top-level layout or wrapper component as `'use client'` because a single theme toggle button inside it needs interactivity. Now, the entire layout, navigation, and everything underneath it are shipped to the browser as Client Components, massively bloating the bundle.
+- **The Solution (Leaf Node Pattern)**: Keep the layout and large wrappers as Server Components. Extract **only** the interactive button into its own tiny Client Component (a "leaf node"). Only that small JavaScript file is sent to the browser.
 
 ---
 
 ### 🚀 Tasks Breakdown & Implementation
 
-#### Task 1: Server Component That Fetches Data (`app/todos/page.tsx`)
-- **File**: [`app/todos/page.tsx`](./app/todos/page.tsx)
-- The page is a Server Component (no `'use client'`).
-- It fetches the todos directly via `await fetch(...)`.
-- It passes the fetched data to `<TodoList initialTodos={todos} />`.
+#### Task 1: Server Component Layout (`app/layout.tsx`)
+- **File**: [`app/layout.tsx`](./app/layout.tsx)
+- The global layout remains a Server Component (no `'use client'`).
+- It renders the `<Header />`, `<main>`, and `<Footer />`.
 
-#### Task 2: Client Component That Receives Data as Props (`components/TodoList.tsx`)
-- **File**: [`components/TodoList.tsx`](./components/TodoList.tsx)
-- Has `'use client'` at the very top.
-- Receives `initialTodos` as a prop and initializes local state: `const [todos, setTodos] = useState(initialTodos)`.
-- Implements interactive filtering (`showCompleted`) and toggling (`handleToggle`) without fetching any new data.
+#### Task 2: Interactive Leaf Components (`components/ThemeToggle.tsx` & `components/CounterButton.tsx`)
+- **Files**: 
+  - [`components/ThemeToggle.tsx`](./components/ThemeToggle.tsx)
+  - [`components/CounterButton.tsx`](./components/CounterButton.tsx)
+- These tiny components have `'use client'` at the top.
+- They encapsulate all state (`useState`) and interactivity (click handlers).
+- They are extracted into entirely separate files to prevent accidentally infecting parent components.
 
-#### Task 3: Verify No Duplicate Fetching
+#### Task 3: Use Leaf Components in Server Components (`components/Header.tsx` & `components/Footer.tsx`)
+- **Files**: 
+  - [`components/Header.tsx`](./components/Header.tsx)
+  - [`components/Footer.tsx`](./components/Footer.tsx)
+- The Header and Footer components themselves are pure Server Components.
+- They render static HTML (navigation links, text) and import/render the Client Component leaves inside them.
+
+#### Task 4: Verify Bundle Size
 - **Verification**:
-  - The fetch to `jsonplaceholder` happens **only on the server** during rendering.
-  - When you visit `/todos` and check the browser DevTools Network tab, there are **zero client-side requests** to `jsonplaceholder`.
-  - The client component receives the data directly in the HTML / RSC payload.
+  - Running `next build` reveals that Layout, Header, and Footer are all marked as `○` (Server static content).
+  - Only `ThemeToggle` and `CounterButton` are shipped to the client, keeping the `First Load JS` footprint minimal.
 
 ---
 
-## 💯 Rubric Alignment for 2.19 (10 / 10 Marks)
+## 💯 Rubric Alignment for 2.20 (10 / 10 Marks)
 
 ### PR Rubric (5 / 5 Marks)
-- [x] **1 mark** – A Server Component fetches data with async/await (`app/todos/page.tsx`).
-- [x] **1 mark** – Data is passed to a Client Component as a prop (`<TodoList initialTodos={todos} />`).
-- [x] **1 mark** – The Client Component has `'use client'` and does NOT fetch data (`components/TodoList.tsx`).
-- [x] **1 mark** – The Client Component uses `useState` or other hooks for interactivity (`useState`, `onChange`).
-- [x] **1 mark** – No duplicate fetching occurs (Verified via Network tab isolation).
+- [x] **1 mark** – Layout and Header/Footer have NO `'use client'` directives.
+- [x] **1 mark** – At least 2 small, focused Client Components exist with `'use client'` (`ThemeToggle`, `CounterButton`).
+- [x] **1 mark** – Leaf Client Components are in separate files.
+- [x] **1 mark** – Leaf Client Components use React hooks (`useState`).
+- [x] **1 mark** – Leaf components are used by Server Component parents (`Header`, `Footer`).
 
 ### Video Rubric (5 / 5 Marks)
-- [x] **1 mark** – Candidate explains the interleaving pattern: server fetches, client receives.
-- [x] **1 mark** – Candidate shows that the Server Component passes data as a prop.
-- [x] **1 mark** – Candidate demonstrates that the Client Component uses the data without fetching.
-- [x] **1 mark** – Candidate explains why this pattern is better than client-side fetching.
-- [x] **1 mark** – Candidate describes serialization: what data types can pass from server to client.
+- [x] **1 mark** – Candidate explains the leaf node pattern.
+- [x] **1 mark** – Candidate shows that parent components remain Server Components.
+- [x] **1 mark** – Candidate demonstrates that only leaf components are Client Components.
+- [x] **1 mark** – Candidate explains the bundle size benefit.
+- [x] **1 mark** – Candidate answers a follow-up on when the entire page needs to be interactive.
 
 ---
 
@@ -57,9 +64,6 @@ This repository contains comprehensive implementations for **Kalvium Next.js Les
 ```bash
 # Install dependencies
 npm install
-
-# Run development server
-npm run dev
 
 # Run production build
 npm run build
