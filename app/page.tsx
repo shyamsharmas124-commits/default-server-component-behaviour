@@ -8,9 +8,29 @@ export default function HomePage() {
           Next.js App Router Architecture
         </h1>
         <p style={{ fontSize: '1.1rem', color: '#4b5563', lineHeight: '1.6' }}>
-          A hands-on implementation and proof of <strong>Basic GET / POST Route Handlers (Lesson 2.26)</strong>, Sequential Fetching (Lesson 2.25), Parallel Fetching (Lesson 2.24), and more.
+          A hands-on implementation and proof of <strong>Request Validation with Zod (Lesson 2.27)</strong>, Route Handlers (Lesson 2.26), and Data Fetching patterns.
         </p>
       </header>
+
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+          Lesson 2.27: Request Validation with Zod
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #fdba74', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <span style={{ backgroundColor: '#ffedd5', color: '#c2410c', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 'bold' }}>Runtime Type Safety</span>
+            <h3 style={{ fontSize: '1.3rem', color: '#c2410c', margin: '0.75rem 0 0.5rem 0' }}>/api/tasks (Safe Parsing)</h3>
+            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6' }}>
+              We treat the incoming HTTP payload as fully untrusted. By using Zod's <code>safeParse</code>, we guarantee that only strictly validated data reaches our database. Invalid requests instantly return a predictable <code>400</code> error with flattened, field-specific error messages.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+              <Link href="/api/tasks" style={{ display: 'inline-block', color: '#ea580c', fontWeight: '600', fontSize: '1.05rem' }}>
+                Test GET /api/tasks &rarr;
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section style={{ marginBottom: '3rem' }}>
         <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
@@ -18,16 +38,9 @@ export default function HomePage() {
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #5eead4', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <span style={{ backgroundColor: '#ccfbf1', color: '#0f766e', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 'bold' }}>JSON API Endpoints</span>
-            <h3 style={{ fontSize: '1.3rem', color: '#0f766e', margin: '0.75rem 0 0.5rem 0' }}>/api/users (Route Handlers)</h3>
-            <p style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.6' }}>
-              We created a RESTful API entirely inside Next.js using `route.ts`. No need for a separate Express server! It exports named <code>GET</code> and <code>POST</code> functions, automatically parsing request bodies and enforcing correct HTTP status codes (200, 201, 400).
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-              <Link href="/api/users" style={{ display: 'inline-block', color: '#0d9488', fontWeight: '600', fontSize: '1.05rem' }}>
-                Test GET /api/users &rarr;
-              </Link>
-            </div>
+            <Link href="/api/users" style={{ display: 'inline-block', color: '#0d9488', fontWeight: '600', fontSize: '1.05rem' }}>
+              Test GET /api/users &rarr;
+            </Link>
           </div>
         </div>
       </section>
@@ -66,19 +79,6 @@ export default function HomePage() {
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #fca5a5', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
             <Link href="/pricing" style={{ display: 'inline-block', color: '#dc2626', fontWeight: '600', fontSize: '1.05rem' }}>
               View ISR Pricing Page &rarr;
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
-          Lesson 2.21: Static Generation (generateStaticParams)
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1.5rem', border: '1px solid #fcd34d', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <Link href="/blog/hello-world" style={{ display: 'inline-block', color: '#d97706', fontWeight: '600', fontSize: '1.05rem' }}>
-              View /blog/[slug] &rarr;
             </Link>
           </div>
         </div>
