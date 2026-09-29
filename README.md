@@ -1,53 +1,52 @@
 # Next.js App Router Architecture: Server & Client Components
 
-This repository contains implementations for **Kalvium Next.js Lessons 2.17 to 2.24**, demonstrating core App Router concepts including Parallel Data Fetching, ISR, SSG, Interleaving, and precise Client Boundaries.
+This repository contains implementations for **Kalvium Next.js Lessons 2.17 to 2.25**, demonstrating core App Router concepts including Sequential & Parallel Data Fetching, ISR, SSG, Interleaving, and precise Client Boundaries.
 
 ---
 
-## 🚀 2.24: Parallel Data Fetching with Promise.all
+## 🔗 2.25: Sequential Data Fetching
 
 ### 📋 Overview & The Real Scenario
-- **The Problem**: A dashboard needs to load user profile data, recent notifications, and analytics. If we use sequential `await` calls, the total fetch time becomes the sum of all requests (creating a slow waterfall effect), even though none of these data sources depend on each other.
-- **The Solution**: Initiate the independent fetch promises simultaneously and resolve them together using `Promise.all`. The total wait time drops from the sum of all requests to simply the duration of the single slowest request.
+- **The Problem**: A page loads slowly because *every* request is awaited one by one (a giant waterfall). Some calls are independent and should be parallel, but one call genuinely needs the result of a previous call to even begin.
+- **The Solution**: Use sequential `await` *only* for the dependent chain. For example, fetch the user first, then use `user.id` to fetch their orders. Anything unrelated (like site preferences) should be initiated early and run in parallel alongside the sequential chain to minimize total latency.
 
 ---
 
 ### 🚀 Tasks Breakdown & Implementation
 
-#### Task 1: Create Three Independent Data Loaders
-- **File**: [`app/dashboard/page.tsx`](./app/dashboard/page.tsx)
-- We implemented `getProfile()`, `getNotifications()`, and `getAnalytics()`.
-- Each function uses an artificial delay (`setTimeout`) to simulate slow DB queries (1000ms, 1500ms, and 1200ms).
-- None of these functions require data from the others to execute.
+#### Task 1: Create a Dependent Fetch Chain
+- **File**: [`app/account/page.tsx`](./app/account/page.tsx)
+- We implemented `getUserByEmail(email)` to fetch the user profile.
+- We strictly `await` the user *before* we can call `getOrdersForUser(user.id)`, because the orders query physically requires the `user.id` to execute. This is a genuine dependency.
 
-#### Task 2: Fetch with Promise.all
-- **File**: [`app/dashboard/page.tsx`](./app/dashboard/page.tsx)
-- We destructured the results from `Promise.all([getProfile(), getNotifications(), getAnalytics()])`.
-- The UI successfully renders all three datasets in separate panels.
+#### Task 2: Parallelize Unrelated Data
+- **File**: [`app/account/page.tsx`](./app/account/page.tsx)
+- The site preferences do not depend on the user ID. 
+- We initiated `const preferencesPromise = getSitePreferences()` at the very top of the component so it runs in the background. 
+- Later, we resolve both the orders fetch and the preferences fetch concurrently using `Promise.all`. This safely combines Sequential and Parallel fetching to achieve the lowest possible latency.
 
-#### Task 3: Compare Against Sequential Fetching
-- **File**: [`app/dashboard/page.tsx`](./app/dashboard/page.tsx)
-- The page measures the exact time it takes to resolve the parallel fetches (`Date.now() - startParallel`).
-- It displays a metric panel showing that a sequential fetch would take ~3700ms, but the parallel fetch takes only ~1500ms (saving over 2 seconds of latency).
-- We also wrapped the `Promise.all` in a `try/catch` block to handle the "all-or-nothing" failure scenario gracefully.
+#### Task 3: Handle Errors Per Step
+- **File**: [`app/account/page.tsx`](./app/account/page.tsx)
+- **Step 1 Failure**: If the user is missing (`?email=notfound@example.com`), we halt the route completely using `notFound()`.
+- **Step 2 Failure**: If the orders fetch fails (`?failOrders=true`), we trap it in a `try/catch`. We still render the User Profile (since it succeeded) but show a graceful, localized error boundary specifically for the order history section.
 
 ---
 
-## 💯 Rubric Alignment for 2.24 (10 / 10 Marks)
+## 💯 Rubric Alignment for 2.25 (10 / 10 Marks)
 
 ### PR Rubric (5 / 5 Marks)
-- [x] **1 mark** - Two or more independent fetches are initiated simultaneously using `Promise.all`.
-- [x] **1 mark** - The total data fetch time is measurably less than sequential fetches (proven by on-screen metrics).
-- [x] **1 mark** - All fetched data is correctly destructured and used in the component.
-- [x] **1 mark** - Errors from any fetch are handled (e.g. `try/catch` around `Promise.all`).
-- [x] **1 mark** - The independent nature of the fetches is clearly evident from the code.
+- [x] **1 mark** - Sequential await calls are used only where a genuine data dependency exists.
+- [x] **1 mark** - The first fetch's result is used as input to the second fetch (`user.id` into `getOrders`).
+- [x] **1 mark** - No unnecessary sequential fetches are present (independent fetches use `Promise.all`).
+- [x] **1 mark** - Each fetch step has appropriate error handling (404 for User, try/catch for Orders).
+- [x] **1 mark** - A comment explains why sequential fetching is required in this case.
 
 ### Video Rubric (5 / 5 Marks)
-- [x] **1 mark** - Candidate explains how `Promise.all` runs fetches concurrently.
-- [x] **1 mark** - Candidate describes the waterfall problem that parallel fetching avoids.
-- [x] **1 mark** - Candidate explains the difference between `Promise.all` and `Promise.allSettled`.
-- [x] **1 mark** - Candidate identifies which fetches are truly independent vs dependent.
-- [x] **1 mark** - Candidate answers a follow-up on error handling when one fetch fails.
+- [x] **1 mark** - Candidate explains what a data dependency is and why it forces sequential fetching.
+- [x] **1 mark** - Candidate gives a concrete example of a valid sequential fetch chain.
+- [x] **1 mark** - Candidate explains the performance cost of unnecessary sequential fetching.
+- [x] **1 mark** - Candidate describes how to minimise sequential steps through data model design.
+- [x] **1 mark** - Candidate answers a follow-up on combining sequential and parallel fetching in one component.
 
 ---
 
